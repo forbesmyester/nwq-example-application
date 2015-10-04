@@ -2,7 +2,6 @@ import querystring from 'querystring';
 
 export default function checkSpelling(dependencies, {haiku}) {
 
-    // Checks a word an individual word in a dictionary
     function checkWord(word) {
         let baseUrl = 'https://api.pearson.com:443/v2/dictionaries/ldoce5/entries',
             params = { headword: word },
