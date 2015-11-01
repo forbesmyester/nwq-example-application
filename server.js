@@ -13,28 +13,30 @@ import fs from 'fs';
 
 const publishDot = addDotDiagram(5050);
 
-const USING_AMAZON_SQS = false;
+const USING_FAKE = true;
 const AWS_REGION = process.env.AWS_REGION || "eu-west-1";
 
-function getExchange() {
-    if (USING_AMAZON_SQS) {
-        let sqs = new AWS.SQS({region: AWS_REGION});
-        return new SQSExchange(sqs);
+function getExchange(fake) {
+    if (fake) {
+        return new MemoryExchange({runMessageCleanup: false});
     }
-    return new MemoryExchange({runMessageCleanup: false});
+    let sqs = new AWS.SQS({region: AWS_REGION});
+    return new SQSExchange(sqs);
 }
 
-let exchange = getExchange();
+let exchange = getExchange(USING_FAKE);
 let adv = new Advancer(exchange);
 var vis = new Visualize(adv);
 vis.on('need-redraw', function(diayaml) {
-    publishDot(
-        dbDiaYaml.getDotSrc(
-            dbDiaYaml.transform(diayaml)
-        ).join("\n")
-    );
+    var dotSrc = dbDiaYaml.getDotSrc(dbDiaYaml.transform(diayaml)).join("\n");
+    publishDot(dotSrc);
 });
 
+publishDot.app.get('/dot-diagram-id-click/:id', function(req, res) {
+    res.json(vis.getData(req.params.id));
+});
+
+function getDependencies(fake) {
     var answers = {
         'I': JSON.parse(fs.readFileSync('test/data/spelling_results/I.json')),
         'lke': JSON.parse(fs.readFileSync('test/data/spelling_results/lke.json')),
@@ -42,32 +44,35 @@ vis.on('need-redraw', function(diayaml) {
         'dictionary': JSON.parse(fs.readFileSync('test/data/spelling_results/dictionary.json'))
     };
 
-    var fakeDeps = {
-        retreiveJson: function(url) {
-            return new Promise((resolve) => {
-                resolve([200, answers[url.replace(/.*=/, '')]]);
-            });
-        }
-    };
+    if (fake) {
+        return {
+            retreiveJson: function(url) {
+                return new Promise((resolve) => {
+                    resolve([200, answers[url.replace(/.*=/, '')]]);
+                });
+            }
+        };
+    }
 
-    var realDeps = { retreiveJson: retreiveJson };
+    return { retreiveJson: retreiveJson };
+}
 
 adv.addSpecification(
     'check-spelling',
     { "spelling-error": ["email-spelling-error"] },
-    r_partial(checkSpelling, fakeDeps)
+    r_partial(checkSpelling, getDependencies(USING_FAKE))
 );
 
 adv.run('check-spelling');
 exchange.postMessagePayload(
     'check-spelling',
-    { haiku: 'I like dictionary'}
+    { haiku: 'I lke dictionary'}
 );
 
-setInterval(() => {
+setTimeout(() => {
     adv.run('check-spelling');
     exchange.postMessagePayload(
         'check-spelling',
-        { haiku: 'I lke dictionary'}
+        { haiku: 'I like dictionary'}
     );
 }, 10000);
