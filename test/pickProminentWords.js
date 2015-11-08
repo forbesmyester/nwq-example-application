@@ -1,8 +1,8 @@
 import {expect} from "chai";
 import fs from 'fs';
-import checkSpelling from '../checkSpelling';
+import prominentWords from '../prominentWords';
 
-describe('server can check spellings', function() {
+describe('server can find prominent words', function() {
 
     var answers = {
         'I': JSON.parse(fs.readFileSync('test/data/spelling_results/I.json')),
@@ -19,26 +19,32 @@ describe('server can check spellings', function() {
         }
     };
 
-    it('correct words', function(done) {
+    it('with dupes', function(done) {
 
-        checkSpelling(deps, {haiku: 'I dictionary'})
-            .then(({resolution, payload: { haiku }}) => {
+        prominentWords(deps, {haiku: 'I like dictionary dictionary'})
+            .then(({resolution, payload: { prominentWords: pw, haiku }}) => {
                 expect(resolution).to.eql('success');
-                expect(haiku).to.eql('I dictionary');
+                expect(haiku).to.eql('I like dictionary dictionary');
+                expect(pw).to.eql(['dictionary']);
             })
             .then(done).catch(done);
 
     });
 
-    it('incorrect words', function(done) {
+    it('if there are none!', function(done) {
 
-        checkSpelling(deps, {haiku: 'I lke dictionary'})
-            .then(({resolution, payload: { haiku }}) => {
-                expect(resolution).to.eql('spelling-error');
-                expect(haiku).to.eql('I lke dictionary');
+        prominentWords(deps, {haiku: 'I like'})
+            .then((message) => {
+                return message;
+            })
+            .then(({resolution, payload: { prominentWords: pw, haiku }}) => {
+                expect(resolution).to.eql('success');
+                expect(haiku).to.eql('I like');
+                expect(pw).to.eql([]);
             })
             .then(done).catch(done);
 
     });
 
 });
+

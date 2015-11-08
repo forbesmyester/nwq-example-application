@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="./public/js/libs/modernizr-2.6.2.min.js"></script>
+  <link rel="stylesheet" href="./node_modules/GroundworkCSS/css/groundwork.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+  <header>
+    <h1>Haiku For You!</h1>
+    <nav role="navigation" class="nav gap-top">
+      <ul role="menubar">
+        <li><a href="./home.html"><i class="icon-home"></i> Browse</a></li>
+        <li><a href="./home.html"><i class="icon-home"></i> Upload</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="countainer">
+
+    <div class="one whole padded">
+      <h2>Add a Haiku</h2>
+          <form action="#" method="post">
+            <fieldset>
+              <legend>Fill in this form to add a graphical, categorized Haiku</legend>
+              <div class="row">
+                <div class="one half padded">
+                  <label for="name">Your Handle</label>
+                  <input id="name" type="text" placeholder="Your Handle">
+                </div>
+                <div class="one half padded">
+                  <label for="email">Your Email</label>
+                  <input id="email" type="email" placeholder="you@example.com">
+                </div>
+              </div>
+              <div class="row">
+                <div class="one whole padded">
+                  <label for="message">Your Haiku</label>
+                  <textarea id="message" placeholder="Old pond..."></textarea>
+                </div>
+              </div>
+              <div class="row">
+                <div class="one whole padded">
+                  <input id="allthings" type="checkbox" name="things" checked="">
+                  <label for="allthings" class="inline">Agree to terms and conditions and that the Haiku is your own original creation</label>
+                </div>
+              </div>
+              <div class="row" style="text-align: right">
+                <input type="submit"/>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+
+  </div>
+
+</body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="./node_modules/GroundworkCSS/js/groundwork.all.js"></script>
+</html>

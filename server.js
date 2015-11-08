@@ -25,12 +25,20 @@ function getExchange(fake) {
 }
 
 let exchange = getExchange(USING_FAKE);
-let adv = new Advancer(exchange);
-var vis = new Visualize(adv);
-vis.on('need-redraw', function(diayaml) {
-    var dotSrc = dbDiaYaml.getDotSrc(dbDiaYaml.transform(diayaml)).join("\n");
-    publishDot(dotSrc);
-});
+let advancer = new Advancer(exchange);
+
+function addVisualization(adv) {
+    var v = new Visualize(adv);
+    v.on('need-redraw', function(diayaml) {
+        var dotSrc = dbDiaYaml.getDotSrc(
+                dbDiaYaml.transform(diayaml)
+            ).join("\n");
+        publishDot(dotSrc);
+    });
+    return v;
+}
+
+var vis = addVisualization(advancer);
 
 publishDot.app.get('/dot-diagram-id-click/:id', function(req, res) {
     res.json(vis.getData(req.params.id));
@@ -57,20 +65,20 @@ function getDependencies(fake) {
     return { retreiveJson: retreiveJson };
 }
 
-adv.addSpecification(
+advancer.addSpecification(
     'check-spelling',
     { "spelling-error": ["email-spelling-error"] },
     r_partial(checkSpelling, getDependencies(USING_FAKE))
 );
 
-adv.run('check-spelling');
+advancer.run('check-spelling');
 exchange.postMessagePayload(
     'check-spelling',
     { haiku: 'I lke dictionary'}
 );
 
 setTimeout(() => {
-    adv.run('check-spelling');
+    advancer.run('check-spelling');
     exchange.postMessagePayload(
         'check-spelling',
         { haiku: 'I like dictionary'}

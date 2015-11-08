@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="./public/js/libs/modernizr-2.6.2.min.js"></script>
+  <link rel="stylesheet" href="./node_modules/GroundworkCSS/css/groundwork.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+  <header>
+    <h1>Haiku For You!</h1>
+    <nav role="navigation" class="nav gap-top">
+      <ul role="menubar">
+        <li><a href="./home.html"><i class="icon-home"></i> Browse</a></li>
+        <li><a href="./home.html"><i class="icon-home"></i> Upload</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="countainer">
+    <div class="padded">
+      <h2>Filter Haiku from the Right</h2>
+    </div>
+    <div class="four fifths padded">
+      <p class="box haiku">
+        <span class="heading"><a href="#frog">Frog</a> <a href="#pond">Pond</a></span>
+        <img src="./public/img/haiku/frog_pond.jpg"/>
+        old pond...<br/>
+        a frog leaps in<br/>
+        water's sound<br/>
+        <div style="text-align: right">
+        <a href="http://en.wikipedia.org/wiki/Haiku" rel="author">Bashō</a>
+        </div>
+      </p>
+      <p class="box haiku">
+        <span class="heading"><a href="#frog">Frog</a> <a href="#road">Road</a></span>
+        <img src="./public/img/haiku/road_frog.jpg"/>
+        big road<br/>
+        frog jumping<br/>
+        very fast<br/>
+        <div style="text-align: right">
+        <a href="https://github.com/forbesmyester" rel="author">Forbesmyester</a>
+        </div>
+      </p>
+    </div>
+    <div class="one fifths filters">
+      <h3>Filters</h3>
+      <nav class="nav vertical nocollapse">
+      <ul class="padded">
+        <li>Cars</li>
+        <li>Pond</li>
+        <li>Boats</li>
+        <li>Cats</li>
+        <li class="selected">Frog</li>
+        <li>Ducks</li>
+      </ul>
+      </nav>
+      <style>
+        .filters li.selected {
+          background-color: grey;
+          color: rgb(211, 211, 211);
+        }
+        .filters li {
+          padding-left: 1em;
+        }
+        .haiku img { width: 50%; margin: auto; display: block; padding: 1em; }
+        .haiku { padding: 1em; text-align: center; }
+        .haiku .heading { text-size 200%; padding-bottom: 1em; }
+      </style>
+    </div>
+  </div>
+
+</body>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="./node_modules/GroundworkCSS/js/groundwork.all.js"></script>
+</html>

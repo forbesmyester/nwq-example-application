@@ -23,7 +23,7 @@ export default function checkSpelling(dependencies, {haiku}) {
         if (wordsSpeltCorrect.indexOf(false) === -1) {
             return {
                 resolution: 'success',
-                payload: haiku
+                payload: { haiku }
             };
         }
 
@@ -33,7 +33,7 @@ export default function checkSpelling(dependencies, {haiku}) {
         // neccessary) "spellcheck/spelling-error" queue.
         return {
             resolution: 'spelling-error',
-            payload: haiku
+            payload: { haiku }
         };
     }
 
