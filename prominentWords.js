@@ -5,10 +5,11 @@ export default function prominentWords(dependencies, {haiku}) {
 
     function checkWord(word) {
         let baseUrl = 'https://api.pearson.com:443/v2/dictionaries/ldoce5/entries',
-            params = { headword: word },
+            params = { headword: word.toLowerCase() },
             url = baseUrl + '?' + querystring.stringify(params);
 
         function isMostlyNoun(responseBody) {
+            if (responseBody === undefined) { return false; }
             if (!responseBody.hasOwnProperty('results')) { return false; }
             if (!responseBody.results.reduce) { return false; }
             var wordInfo = responseBody.results[0];
@@ -25,7 +26,6 @@ export default function prominentWords(dependencies, {haiku}) {
     }
 
     function prepareResult(wordsThatAreNouns) {
-
         return {
             resolution: 'success',
             payload: {
@@ -41,7 +41,7 @@ export default function prominentWords(dependencies, {haiku}) {
             return uniq(
                 wordResults
                     .filter(({isNoun}) => { return isNoun; } )
-                    .map(({word}) => { return word; } )
+                    .map(({word}) => { return word.toLowerCase(); } )
             );
         })
         .then(prepareResult);

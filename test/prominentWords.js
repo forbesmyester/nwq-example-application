@@ -5,6 +5,7 @@ import prominentWords from '../prominentWords';
 describe('server can find prominent words', function() {
 
     var answers = {
+        'frog': JSON.parse(fs.readFileSync('test/data/spelling_results/frog.json')),
         'I': JSON.parse(fs.readFileSync('test/data/spelling_results/I.json')),
         'lke': JSON.parse(fs.readFileSync('test/data/spelling_results/lke.json')),
         'like': JSON.parse(fs.readFileSync('test/data/spelling_results/like.json')),
@@ -21,11 +22,11 @@ describe('server can find prominent words', function() {
 
     it('with dupes', function(done) {
 
-        prominentWords(deps, {haiku: 'I like dictionary dictionary'})
+        prominentWords(deps, {haiku: 'Frog like dictionary dictionary'})
             .then(({resolution, payload: { prominentWords: pw, haiku }}) => {
                 expect(resolution).to.eql('success');
-                expect(haiku).to.eql('I like dictionary dictionary');
-                expect(pw).to.eql(['dictionary']);
+                expect(haiku).to.eql('Frog like dictionary dictionary');
+                expect(pw).to.eql(['frog', 'dictionary']);
             })
             .then(done).catch(done);
 
