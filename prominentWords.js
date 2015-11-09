@@ -1,7 +1,8 @@
 import querystring from 'querystring';
 import {uniq} from 'ramda';
+import {merge} from 'ramda';
 
-export default function prominentWords(dependencies, {haiku}) {
+export default function prominentWords(dependencies, payload) {
 
     function checkWord(word) {
         let baseUrl = 'https://api.pearson.com:443/v2/dictionaries/ldoce5/entries',
@@ -26,17 +27,18 @@ export default function prominentWords(dependencies, {haiku}) {
     }
 
     function prepareResult(wordsThatAreNouns) {
+        var newPayload = merge(
+            { prominentWords: wordsThatAreNouns },
+            payload
+        );
         return {
             resolution: 'success',
-            payload: {
-                haiku,
-                prominentWords: wordsThatAreNouns
-            }
+            payload: newPayload
         };
     }
 
     // Break into words and send all of them for spellchecking
-    return Promise.all(haiku.split(/\s+/).map(checkWord))
+    return Promise.all(payload.haiku.split(/\s+/).map(checkWord))
         .then((wordResults) => {
             return uniq(
                 wordResults

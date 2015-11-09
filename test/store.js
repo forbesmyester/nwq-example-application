@@ -1,6 +1,6 @@
 import {expect} from "chai";
-import categorize from '../categorize';
-import DataStore from '../DataStore';
+import store from '../store';
+import DataStore from '../lib/DataStore';
 
 describe('server', function() {
 
@@ -14,26 +14,19 @@ describe('server', function() {
         var data = {
             prominentWords: ['dictionary', 'frog'],
             haiku: 'Frog likes dictionary dictionary',
-            id: 'a123'
+            id: 'h.a123'
         };
 
-
-        categorize(deps, data)
+        store(deps, data)
             .then((message) => {
                 expect(message.resolution).to.eql('success');
                 expect(message.payload).to.eql(data);
                 return message;
             })
-            .then(function(message) {
-                return Promise.all([
-                    ds._getStored('c.dictionary'),
-                    ds._getStored('c.frog'),
-                    ds._getStored('h.a123')
-                ]);
+            .then(function() {
+                return ds._getStored({}, 'h.a123');
             })
-            .then(function([dictionaryIndex, frogIndex, myData]) {
-                expect(frogIndex).to.eql({v: 1, d: ['a123']});
-                expect(dictionaryIndex).to.eql({v: 1, d: ['a123']});
+            .then(function(myData) {
                 expect(myData).to.eql({v: 1, d: data});
             })
             .then(done).catch(done);
@@ -41,4 +34,3 @@ describe('server', function() {
     });
 
 });
-

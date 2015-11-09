@@ -1,6 +1,6 @@
 import querystring from 'querystring';
 
-export default function checkSpelling(dependencies, {haiku}) {
+export default function checkSpelling(dependencies, payload) {
 
     function checkWord(word) {
         let baseUrl = 'https://api.pearson.com:443/v2/dictionaries/ldoce5/entries',
@@ -23,7 +23,7 @@ export default function checkSpelling(dependencies, {haiku}) {
         if (wordsSpeltCorrect.indexOf(false) === -1) {
             return {
                 resolution: 'success',
-                payload: { haiku }
+                payload: payload
             };
         }
 
@@ -33,12 +33,12 @@ export default function checkSpelling(dependencies, {haiku}) {
         // neccessary) "spellcheck/spelling-error" queue.
         return {
             resolution: 'spelling-error',
-            payload: { haiku }
+            payload: payload
         };
     }
 
     // Break into words and send all of them for spellchecking
-    return Promise.all(haiku.split(/\s+/).map(checkWord))
+    return Promise.all(payload.haiku.split(/\s+/).map(checkWord))
         .then(checkSpellingResults);
 }
 

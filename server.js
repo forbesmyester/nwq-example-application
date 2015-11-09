@@ -1,20 +1,32 @@
 import AWS from "aws-sdk";
 // TODO: Ensure to go back to NPM version.
-import MemoryExchange from "nwq/MemoryExchange";
-import Visualize from "nwq/Visualize";
-import SQSExchange from "nwq/SQSExchange";
-import Advancer from "nwq/Advancer";
+import MemoryExchange from "nwq/lib/MemoryExchange";
+import Visualize from "nwq/lib/Visualize";
+import SQSExchange from "nwq/lib/SQSExchange";
+import Advancer from "nwq/lib/Advancer";
 import checkSpelling from './checkSpelling';
 import r_partial from 'ramda/src/partial';
 import retreiveJson from './lib/retreiveJson';
+import DataStore from './lib/DataStore';
 import addDotDiagram from 'add-dot-diagram';
 import dbDiaYaml from 'db-diayaml';
+import getTLIdEncoderDecoder from 'get_tlid_encoder_decoder';
 import fs from 'fs';
 
-const publishDot = addDotDiagram(5050);
+import storeProminentWordsAsCategories from './storeProminentWordsAsCategories';
+import prominentWords from './prominentWords';
+import flickrUsername from './flickrUsername';
+import searchFlickr from './searchFlickr';
+import store from './store';
+import addId from './addId';
+import join from './join';
+import markTaskDone from './markTaskDone';
+import publish from './publish';
 
+const publishDot = addDotDiagram(5050);
 const USING_FAKE = true;
 const AWS_REGION = process.env.AWS_REGION || "eu-west-1";
+var encoderDecoder = getTLIdEncoderDecoder((new Date(2015, 10, 14).getTime()), 2);
 
 function getExchange(fake) {
     if (fake) {
@@ -41,7 +53,8 @@ function addVisualization(adv) {
 var vis = addVisualization(advancer);
 
 publishDot.app.get('/dot-diagram-id-click/:id', function(req, res) {
-    res.json(vis.getData(req.params.id));
+    let toSend = vis.getData(req.params.id);
+    res.json(toSend);
 });
 
 function getDependencies(fake) {
@@ -52,35 +65,116 @@ function getDependencies(fake) {
         'dictionary': JSON.parse(fs.readFileSync('test/data/spelling_results/dictionary.json'))
     };
 
+    var deps = {
+        dataStore: new DataStore(),
+        retreiveJson: retreiveJson,
+        env: process.env,
+        generateId: function() { return 'h.' + encoderDecoder.encode(); }
+    };
+
     if (fake) {
-        return {
-            retreiveJson: function(url) {
-                return new Promise((resolve) => {
-                    resolve([200, answers[url.replace(/.*=/, '')]]);
-                });
-            }
+        deps.retreiveJson = function(url) {
+            return new Promise((resolve) => {
+                resolve([200, answers[url.replace(/.*=/, '')]]);
+            });
         };
     }
 
-    return { retreiveJson: retreiveJson };
+    return deps;
 }
 
+function validateJoinPossible(ob) {
+    if (typeof ob !== 'object') { return false; }
+    return (
+        ob.hasOwnProperty('prominentWords') &&
+        (ob.hasOwnProperty('image'))
+    );
+}
+
+var dependencies = getDependencies(false);
+
 advancer.addSpecification(
-    'check-spelling',
-    { "spelling-error": ["email-spelling-error"] },
-    r_partial(checkSpelling, getDependencies(USING_FAKE))
+    'addId',
+    { success: 'checkSpelling' },
+    r_partial(addId, dependencies)
 );
 
-advancer.run('check-spelling');
-exchange.postMessagePayload(
-    'check-spelling',
-    { haiku: 'I lke dictionary'}
+advancer.addSpecification(
+    'checkSpelling',
+    { success: 'prominentWords' },
+    r_partial(checkSpelling, dependencies)
 );
+
+advancer.addSpecification(
+    'prominentWords',
+    { success: ['searchFlickr', 'storeProminentWordsAsCategories'] },
+    r_partial(prominentWords, dependencies)
+);
+
+advancer.addSpecification(
+    'searchFlickr',
+    { success: 'flickrUsername' },
+    r_partial(searchFlickr, dependencies)
+);
+
+advancer.addSpecification(
+    'flickrUsername',
+    { success: 'markFlickrDone' },
+    r_partial(flickrUsername, dependencies)
+);
+
+advancer.addSpecification(
+    'markFlickrDone',
+    { success: 'join' },
+    r_partial(markTaskDone, dependencies, 'flickr')
+);
+
+advancer.addSpecification(
+    'storeProminentWordsAsCategories',
+    { success: 'markCategorizationDone' },
+    r_partial(storeProminentWordsAsCategories, dependencies)
+);
+
+advancer.addSpecification(
+    'markCategorizationDone',
+    { success: 'join' },
+    r_partial(markTaskDone, dependencies, 'categorization')
+);
+
+advancer.addSpecification(
+    'join',
+    { success: ['publish'], waiting: [] },
+    r_partial(join, dependencies, ['categorization', 'flickr'])
+);
+
+advancer.addSpecification(
+    'publish',
+    { success: 'storePublished' },
+    r_partial(publish, dependencies)
+);
+
+advancer.addSpecification(
+    'storePublished',
+    {},
+    r_partial(store, dependencies)
+);
+
+advancer.runAllForever();
+
+advancer.on('err', function(err) {
+    console.log("Advancer Detected Error: ", err.message, "at \n\n", err.stack);
+});
 
 setTimeout(() => {
-    advancer.run('check-spelling');
     exchange.postMessagePayload(
-        'check-spelling',
+        'addId',
+        { haiku: 'I like diktionary'}
+    );
+}, 1000);
+setTimeout(() => {
+    exchange.postMessagePayload(
+        'addId',
         { haiku: 'I like dictionary'}
     );
-}, 10000);
+}, 4000);
+
