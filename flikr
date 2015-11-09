@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. ./env
+curl -v "https://api.flickr.com/services/rest/?api_key=${FLIKR_API_KEY}&method=flickr.photos.search&text=frog%20pond&extras=original_format&format=json"
+
