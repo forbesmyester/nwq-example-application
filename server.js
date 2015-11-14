@@ -83,14 +83,6 @@ function getDependencies(fake) {
     return deps;
 }
 
-function validateJoinPossible(ob) {
-    if (typeof ob !== 'object') { return false; }
-    return (
-        ob.hasOwnProperty('prominentWords') &&
-        (ob.hasOwnProperty('image'))
-    );
-}
-
 var dependencies = getDependencies(false);
 
 advancer.addSpecification(
@@ -162,6 +154,7 @@ advancer.addSpecification(
 advancer.runAllForever();
 
 advancer.on('err', function(err) {
+    /* eslint no-console: 0 */
     console.log("Advancer Detected Error: ", err.message, "at \n\n", err.stack);
 });
 

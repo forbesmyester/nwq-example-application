@@ -1,6 +1,5 @@
 import {path} from 'ramda';
 import {omit} from 'ramda';
-import {pipe} from 'ramda';
 import {map} from 'ramda';
 import {filter} from 'ramda';
 import mergeIntoDataStore from './mergeIntoDataStore';
