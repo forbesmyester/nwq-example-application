@@ -20,7 +20,7 @@
     "url": "https://github.com/forbesmyester/nwq/issues"
   },
   "dependencies": {
-    "add-dot-diagram": "^0.9.7",
+    "add-dot-diagram": "^0.9.6",
     "aws-sdk": "^2.2.6",
     "body-parser": "^1.14.1",
     "db-diayaml": "^0.9.8",
