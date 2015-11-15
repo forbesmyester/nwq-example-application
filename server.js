@@ -1,9 +1,9 @@
 import AWS from "aws-sdk";
 // TODO: Ensure to go back to NPM version.
-import MemoryExchange from "nwq/lib/MemoryExchange";
-import Visualize from "nwq/lib/Visualize";
-import SQSExchange from "nwq/lib/SQSExchange";
-import Advancer from "nwq/lib/Advancer";
+import MemoryExchange from "nwq/MemoryExchange";
+import Visualize from "nwq/Visualize";
+import SQSExchange from "nwq/SQSExchange";
+import Advancer from "nwq/Advancer";
 import checkSpelling from './checkSpelling';
 import r_partial from 'ramda/src/partial';
 import retreiveJson from './lib/retreiveJson';

@@ -28,7 +28,7 @@
     "express": "^4.13.3",
     "get_tlid_encoder_decoder": "^0.9.4",
     "node-fetch": "^1.3.3",
-    "nwq": "^0.5.12",
+    "nwq": "^0.5.14",
     "ramda": "^0.17.1"
   },
   "devDependencies": {

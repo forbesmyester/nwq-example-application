@@ -1,1 +1,1 @@
-server: nodemon server-boot.js
+server: node server-boot.js
