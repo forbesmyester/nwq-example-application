@@ -12,6 +12,8 @@ import addDotDiagram from 'add-dot-diagram';
 import dbDiaYaml from 'db-diayaml';
 import getTLIdEncoderDecoder from 'get_tlid_encoder_decoder';
 import fs from 'fs';
+import express from 'express';
+import bodyParser from 'body-parser';
 
 import storeProminentWordsAsCategories from './storeProminentWordsAsCategories';
 import prominentWords from './prominentWords';
@@ -23,9 +25,15 @@ import join from './join';
 import markTaskDone from './markTaskDone';
 import publish from './publish';
 
-const publishDot = addDotDiagram(5050);
 const USING_FAKE = true;
 const AWS_REGION = process.env.AWS_REGION || "eu-west-1";
+
+
+const NWQ_EXAMPLE_COMMAND_PORT = process.env.NWQ_EXAMPLE_COMMAND_PORT ? process.env.NWQ_EXAMPLE_COMMAND_PORT : 5051;
+const NWQ_EXAMPLE_VISUALIZATION_PORT = process.env.NWQ_EXAMPLE_VISUALIZATION_PORT ? process.env.NWQ_EXAMPLE_VISUALIZATION_PORT : 5050;
+
+const publishDot = addDotDiagram(NWQ_EXAMPLE_VISUALIZATION_PORT);
+
 var encoderDecoder = getTLIdEncoderDecoder((new Date(2015, 10, 14).getTime()), 2);
 
 function getExchange(fake) {
@@ -93,8 +101,11 @@ advancer.addSpecification(
 
 advancer.addSpecification(
     'checkSpelling',
-    { success: 'prominentWords' },
-    r_partial(checkSpelling, dependencies)
+    {
+        success: ['prominentWords'],
+        misspelt: ['log', 'informUser']
+    },
+    checkSpelling.bind(this, dependencies)
 );
 
 advancer.addSpecification(
@@ -158,16 +169,38 @@ advancer.on('err', function(err) {
     console.log("Advancer Detected Error: ", err.message, "at \n\n", err.stack);
 });
 
-setTimeout(() => {
-    exchange.postMessagePayload(
-        'addId',
-        { haiku: 'I like diktionary'}
-    );
-}, 1000);
-setTimeout(() => {
-    exchange.postMessagePayload(
-        'addId',
-        { haiku: 'I like dictionary'}
-    );
-}, 4000);
+if (
+    !process.env.hasOwnProperty('NWQ_EXAMPLE_AUTO_RUN') ||
+    parseInt(process.env.NWQ_EXAMPLE_AUTO_RUN, 10)
+) {
+    setTimeout(() => {
+        exchange.postMessagePayload(
+            'addId',
+            { haiku: 'I like diktionary'}
+        );
+    }, 1000);
+    setTimeout(() => {
+        exchange.postMessagePayload(
+            'addId',
+            { haiku: 'I like dictionary'}
+        );
+    }, 4000);
+}
 
+
+var app = express();
+app.use(bodyParser.json());
+app.post('/command', function(req, res) {
+    console.log(req.body);
+    if (req.body && req.body.haiku && (typeof req.body.haiku == 'string')) {
+        exchange.postMessagePayload(
+            'addId',
+            req.body
+        );
+        return res.sendStatus(200);
+    }
+    res.sendStatus(422);
+});
+app.listen(NWQ_EXAMPLE_COMMAND_PORT, function() {
+    console.log("Listening for commands on port " + NWQ_EXAMPLE_COMMAND_PORT);
+});
