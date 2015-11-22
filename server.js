@@ -25,7 +25,7 @@ import join from './join';
 import markTaskDone from './markTaskDone';
 import publish from './publish';
 
-const USING_FAKE = true;
+const USING_FAKE = !!process.env.USING_FAKE;
 const AWS_REGION = process.env.AWS_REGION || "eu-west-1";
 
 

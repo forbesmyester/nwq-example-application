@@ -1,6 +1,5 @@
 import querystring from 'querystring';
-import {uniq} from 'ramda';
-import {merge} from 'ramda';
+import {pipe, take, merge, uniq, filter, map} from 'ramda';
 
 export default function prominentWords(dependencies, payload) {
 
@@ -13,8 +12,14 @@ export default function prominentWords(dependencies, payload) {
             if (responseBody === undefined) { return false; }
             if (!responseBody.hasOwnProperty('results')) { return false; }
             if (!responseBody.results.reduce) { return false; }
-            var wordInfo = responseBody.results[0];
-            return wordInfo.part_of_speech == 'noun';
+
+            var nounCount = (pipe(
+                take(5),
+                map((result) => result.part_of_speech),
+                filter((part_of_speech) => part_of_speech == 'noun')
+            )(responseBody.results)).length;
+
+            return (nounCount > 0);
         }
 
         return dependencies.retreiveJson(url)
